@@ -8,30 +8,19 @@ library(ppcor) #Partial correlation needs this package
 library(GGally) #Not necessary, but creates cool graphs of correlation
 library(naniar) #Replacing codes of missing data to NA
 library(psych) # to use the function "with" to do the descriptive statistics
-library(car) # Testing if the coefficients are different using linear hypothesis test and do the VIF
+library(car) # Do the VIF
 library(caret) #To produce non-linear regressions
 library(lmtest) #Breusch-Pagan test
 library(RVAideMemoire) # Necessary to do the shapiro test
 library(psychometric) #provides confidence intervals for R2
 library(gridExtra) # Put two plots side by side with ggplot
-library(ggpubr) #Create plots to check normaility
+library(ggpubr) #Create plots to check normality
 library(rstatix) #To use the function "add_significance"
 library(scales) # Makes a break in the labels line (put in two or more when necessary)
 library(ggiraphExtra)
 library(srvyr) # Package to work with weighted data
 library(quantreg) # Model quantile regression
 
-#The formula above calculates R2 CI95: in the parenthesis, the R2, the sample, the number of predictors in the model, and significance
-#  CI.Rsq(rsq, n, k, level = 0.95)
-
-
-
-
-#Set working directory
-
-setwd("G:/Meu Drive/ARTIGOS PUBLICADOS E A SEREM PUBLICADOS/Artigos em andamento e parados/Artigo associações timing da AF crianças/Documentos e análises/Data/Corrected by Gil 190924")
-
-#Creating first object of the data
 
 data1 <- readxl::read_excel(
   "Database-Patterns - Final - Clean.xlsx", sheet = 1)
@@ -136,28 +125,9 @@ summary(ChildrenData)
 
 # DESCRIPTIVE STATISTICS ####
 
-#Not a problem in terms of normality: Age, weight, Height, BMI, 
-
-# Handgrip, Vai e vem, ShuttleRun,HorizontalImpulse, 
-# VerticalImpulse, Speed20m,   
-
-
 ggqqplot(ChildrenData, x = "Abdominal", facet.by = "Sex")
 
 
-
-
-#Shown problems of normality: Abdominal, PushUp, Speed40m, 
-#TotalST, Total LPA, TotalMVPA, MorningMVPA, AfternoonMVPA
-
-
-# Relationship between morning and afternoon MVPA 
-
-cor.test(ChildrenData$MorningMVPA, ChildrenData$AfternoonMVPA, method = "kendall")
-
-
-#FOR ALL
-#Mean
 MeanVariables <- ChildrenData  |> 
   dplyr::summarise(n(),
             Age = mean(Age),
@@ -198,7 +168,6 @@ MeanVariables2 <- ChildrenData  |>
 
 
 
-
 MeanVariables2
 
 rm(MeanVariables, MeanVariables2)
@@ -216,7 +185,6 @@ MVPAVariables <- ChildrenData  |>
 MVPAVariables
 
 
-
 SDMVPAVariables <- ChildrenData  |> 
   dplyr::group_by(Sex) |> 
   dplyr::summarise(TotalST = format(IQR(TotalST, na.rm = T), digits = 3),
@@ -232,40 +200,6 @@ SDMVPAVariables
 rm(MVPAVariables, SDMVPAVariables)
 
 
-# CHECKING ASSUMPTIONS ####
-
-#Normality
-
-
-
-BMI <- OlderData$BMI
-Sex <- OlderData$Sex
-
-byf.shapiro(Handgrip ~ Sex, data = ChildrenData)
-ks.test(Handgrip ~ Sex, data = ChildrenData, exact = T)
-ks.test(HandgripMean ~ Sex, data = ChildrenData, exact = T)
-
-
-
-# Some assumptions before comparisons in the baseline ####
-
-# Levene test
-
-ChildrenData %>% levene_test(Age ~ Sex) #No problem
-ChildrenData %>% levene_test(Height ~ Sex) # Heterogeneity
-ChildrenData %>% levene_test(Weight ~ Sex)# Heterogeneity
-ChildrenData %>% levene_test(BMI ~ Sex) # No problem
-ChildrenData %>% levene_test(Handgrip ~ Sex) # Heterogeneity
-ChildrenData %>% levene_test(VaieVem ~ Sex) # Heterogeneity
-ChildrenData %>% levene_test(Abdominal ~ Sex)# Heterogeneity
-ChildrenData %>% levene_test(ShuttleRun ~ Sex)# Heterogeneity
-ChildrenData %>% levene_test(PushUp ~ Sex) # Heterogeneity
-ChildrenData %>% levene_test(HorizontalImpulse ~ Sex) # Heterogeneity
-ChildrenData %>% levene_test(VerticalImpulse ~ Sex) # Heterogeneity
-ChildrenData %>% levene_test(Speed20m ~ Sex) # Heterogeneity
-ChildrenData %>% levene_test(Speed40m ~ Sex) # Heterogeneity
-ChildrenData %>% levene_test(Handgrip ~ Sex) # Heterogeneity
-
 #Comparing sex at the baseline ####
 
 ChildrenData %>% t_test(Age ~ Sex) %>% add_significance()
@@ -279,7 +213,6 @@ wilcox.test(MorningMVPA ~ Sex, ChildrenData)
 wilcox.test(AfternoonMVPA ~ Sex, ChildrenData)
 wilcox.test(RelativeMorningMVPA ~ Sex, ChildrenData)
 wilcox.test(RelativeAfternoonMVPA ~ Sex, ChildrenData)
-
 
 
 
@@ -728,7 +661,7 @@ rm(BMIA1, BMIA2, BMIA3, BMIM1, BMIM2, BMIM3, AbdominalA1, AbdominalA2, Abdominal
 
 
 
-# Internal checking ###
+# Sensitivity analysis ###
 
 #For morning
 
@@ -1745,12 +1678,3 @@ ggsave(filename = "Figure1.pdf", plot = FigureReady,
 ggsave(filename = "Figure1.svg", plot = FigureReady,
        width = 9, height = 4.5,
        path = "G:/Meu Drive/ARTIGOS PUBLICADOS E A SEREM PUBLICADOS/Artigos em andamento e parados/Artigo associações timing da AF crianças/Documentos e análises/Figures")
-
-
-
-
-
-
-
-
-
